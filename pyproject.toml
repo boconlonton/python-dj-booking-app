@@ -9,6 +9,9 @@ packages = [{include = "python_dj_booking_app"}]
 [tool.poetry.dependencies]
 python = "^3.8"
 Django = "^4.1.4"
+django-hvad = "^1.8.0"
+django-formtools = "^2.4"
+psycopg2-binary = "^2.9.5"
 
 
 [build-system]

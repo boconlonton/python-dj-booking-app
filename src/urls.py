@@ -1,21 +1,20 @@
-"""src URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-from django.contrib import admin
 from django.urls import path
 
+from .admin import admin
+
+from .views import (BookingApproveView, BookingCreateWizardView,
+                    BookingDeleteView, BookingHomeView, BookingListView,
+                    BookingSettingsView, get_available_time)
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("internal/admin/", admin.site.urls),
+    path("", BookingCreateWizardView.as_view(), name="create_booking"),
+    path("admin", BookingHomeView.as_view(), name="admin_dashboard"),
+    path("admin/list", BookingListView.as_view(), name="booking_list"),
+    path("admin/settings", BookingSettingsView.as_view(), name="booking_settings"),
+    path("admin/<pk>/delete",
+         BookingDeleteView.as_view(), name="booking_delete"),
+    path("admin/<pk>/approve",
+         BookingApproveView.as_view(), name="booking_approve"),
+    path("get-available-time", get_available_time, name="get_available_time"),
 ]
