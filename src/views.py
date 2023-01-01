@@ -5,8 +5,6 @@ from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.urls import reverse_lazy
 from django.views.generic import (DeleteView, ListView, TemplateView,
                                   UpdateView, View)
-from django.core.mail import send_mail
-from django.conf import settings
 
 from formtools.wizard.views import SessionWizardView
 
@@ -17,6 +15,7 @@ from .settings import (BOOKING_BG, BOOKING_DESC, BOOKING_DISABLE_URL,
                               BOOKING_SUCCESS_REDIRECT_URL, BOOKING_TITLE,
                               PAGINATION)
 from .utils import BookingSettingMixin
+from .celery import send_confirmation_email
 
 
 # # # # # # #
@@ -68,11 +67,7 @@ class BookingApproveView(BookingSettingMixin, View):
         booking.approved = True
         booking.save()
 
-        send_mail('[no-reply] Booking Confirmation',
-                  f'Hi {booking.user_name}, your booking at {booking.time}{booking.date} has been confirmed. '
-                  f'Thank you!',
-                  settings.EMAIL_HOST_USER,
-                  [booking.user_email])
+        send_confirmation_email.delay(booking)
 
         return redirect(self.success_url)
 
