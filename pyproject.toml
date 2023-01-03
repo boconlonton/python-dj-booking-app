@@ -11,8 +11,9 @@ python = "^3.8"
 Django = "^4.1.4"
 django-hvad = "^1.8.0"
 django-formtools = "^2.4"
-psycopg2-binary = "^2.9.5"
 celery = "^5.2.7"
+mysqlclient = "^2.1.1"
+redis = "^4.4.0"
 
 
 [build-system]

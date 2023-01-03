@@ -1,5 +1,7 @@
 import os
 
+import json
+
 import logging
 
 from celery import Celery
@@ -10,7 +12,7 @@ from django.conf import settings
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'src.settings')
 
-app = Celery('worker')
+app = Celery('booking_worker')
 
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
@@ -22,9 +24,11 @@ logger = logging.getLogger(__name__)
 
 @app.task(bind=True)
 def send_confirmation_email(self, booking):
+    data = json.loads(booking)
+    data = data[0].get('fields')
     send_mail('[no-reply] Booking Confirmation',
-              f'Hi {booking.user_name}, your booking at {booking.time}{booking.date} has been confirmed. '
+              f'Hi {data["user_name"]}, your booking at {data["time"]} {data["date"]} has been confirmed. '
               f'Thank you!',
               settings.EMAIL_HOST_USER,
-              [booking.user_email])
+              [data['user_email']])
     logger.info(f'Send email successfully...')

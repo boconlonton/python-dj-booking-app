@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.urls import reverse_lazy
 from django.views.generic import (DeleteView, ListView, TemplateView,
                                   UpdateView, View)
+from django.core import serializers
 
 from formtools.wizard.views import SessionWizardView
 
@@ -67,7 +68,7 @@ class BookingApproveView(BookingSettingMixin, View):
         booking.approved = True
         booking.save()
 
-        send_confirmation_email.delay(booking)
+        send_confirmation_email.delay(serializers.serialize('json', [booking]))
 
         return redirect(self.success_url)
 
