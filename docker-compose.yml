@@ -1,0 +1,78 @@
+version: "3.8"
+
+services:
+  app:
+    command: >
+      bash -c "poetry run python manage.py migrate
+      && poetry run python manage.py createsuperuser --noinput
+      && poetry run python manage.py runserver 0.0.0.0:8000"
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SUPERUSER_USERNAME: admin
+      DJANGO_SUPERUSER_PASSWORD: 123
+      DJANGO_SUPERUSER_EMAIL: "admin@admin.com"
+      MYSQL_DB: djbooking
+      MYSQL_USER: root
+      MYSQL_PASSWORD: mauFJcuf5dhRMQrjj
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      EMAIL_HOST_USER: willman0032@gmail.com
+      EMAIL_HOST_PASSWORD: clojaoljearxppgo
+      CELERY_BROKER_REDIS_URL: redis://redis:6379
+    depends_on:
+      db:
+        condition: service_healthy
+
+  worker:
+    command: "poetry run celery --app src.celery worker --loglevel INFO"
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      MYSQL_DB: djbooking
+      MYSQL_USER: root
+      MYSQL_PASSWORD: mauFJcuf5dhRMQrjj
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      EMAIL_HOST_USER: willman0032@gmail.com
+      EMAIL_HOST_PASSWORD: clojaoljearxppgo
+      CELERY_BROKER_REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+
+  db:
+    image: mysql
+    cap_add:
+      - SYS_NICE
+    restart: always
+    environment:
+      MYSQL_DATABASE: djbooking
+      MYSQL_ROOT_PASSWORD: mauFJcuf5dhRMQrjj
+    volumes:
+      - db:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning
+    volumes:
+      - cache:/data
+
+volumes:
+    db:
+    cache:
