@@ -22,9 +22,9 @@ services:
       MYSQL_PASSWORD: mauFJcuf5dhRMQrjj
       MYSQL_HOST: db
       MYSQL_PORT: 3306
-      EMAIL_HOST_USER: willman0032@gmail.com
-      EMAIL_HOST_PASSWORD: clojaoljearxppgo
       CELERY_BROKER_REDIS_URL: redis://redis:6379
+    env_file:
+      - ./config/.env
     depends_on:
       db:
         condition: service_healthy
