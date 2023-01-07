@@ -19,14 +19,12 @@ from .utils import BookingSettingMixin
 from .celery import send_confirmation_email
 
 
-# # # # # # #
-# Admin Part
-# # # # # # #
 class BookingHomeView(BookingSettingMixin, TemplateView):
     model = Booking
     template_name = "src/admin/dashboard.html"
 
     def get_context_data(self, **kwargs):
+        """Specify the context data"""
         context = super().get_context_data(**kwargs)
         context["last_bookings"] = Booking.objects.filter().order_by(
             "date", "time")[:10]
@@ -46,9 +44,11 @@ class BookingSettingsView(BookingSettingMixin, UpdateView):
     template_name = "src/admin/booking_settings.html"
 
     def get_object(self):
+        """Specify the get object method."""
         return BookingSettings.objects.filter().first()
 
     def get_success_url(self):
+        """Specify the url to redirect after success booking."""
         return reverse("booking_settings")
 
 
@@ -63,7 +63,12 @@ class BookingApproveView(BookingSettingMixin, View):
     success_url = reverse_lazy('booking_list')
     fields = ("approved",)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> None:
+        """Approve booking API.
+
+        Args:
+            request (Request): specify the HTTP request object.
+        """
         booking = get_object_or_404(Booking, pk=self.kwargs.get("pk"))
         booking.approved = True
         booking.save()
@@ -88,6 +93,11 @@ class BookingCreateWizardView(SessionWizardView):
     form_list = BOOKING_STEP_FORMS
 
     def get_context_data(self, form, **kwargs):
+        """Get data of a form.
+
+        Args:
+            form (Form): specify Django form object.
+        """
         context = super().get_context_data(form=form, **kwargs)
         progress_width = "6"
         if self.steps.current == 'Time':
@@ -108,6 +118,11 @@ class BookingCreateWizardView(SessionWizardView):
         return context
 
     def render(self, form=None, **kwargs):
+        """Render booking page.
+
+        Args:
+            form (Form): specify the Django form object.
+        """
         # Check if Booking is Disable
         form = form or self.get_form()
         context = self.get_context_data(form=form, **kwargs)
@@ -118,6 +133,12 @@ class BookingCreateWizardView(SessionWizardView):
         return self.render_to_response(context)
 
     def done(self, form_list, **kwargs):
+        """Specify the view for booking done.
+
+        Args:
+            form_list (list[Form]): specify the list of form objects.
+        
+        """
         data = dict((key, value) for form in form_list for key,
                     value in form.cleaned_data.items())
         booking = Booking.objects.create(**data)
@@ -142,10 +163,14 @@ def add_delta(time: datetime.time, delta: datetime.datetime) -> datetime.time:
 
 
 def get_available_time(date: datetime.date) -> List[Dict[datetime.time, bool]]:
-    """
-    Check for all available time for selected date
-    The times should ne betwwen start_time and end_time
-    If the time already is taken -> is_taken = True
+    """Check for all available time for selected date.
+
+    Notes:
+        The times should ne betwwen start_time and end_time
+        If the time already is taken -> is_taken = True
+    
+    Args:
+        date (datetime): specify the time to check.
     """
     booking_settings = BookingSettings.objects.first()
     existing_bookings = Booking.objects.filter(

@@ -23,7 +23,12 @@ logger = logging.getLogger(__name__)
 
 
 @app.task(bind=True)
-def send_confirmation_email(self, booking):
+def send_confirmation_email(self, booking: str) -> None:
+    """Send confirmation email to the user.
+
+    Args:
+        booking (JSON): specify the JSON serialized string of booking object.
+    """
     data = json.loads(booking)
     data = data[0].get('fields')
     send_mail('[no-reply] Booking Confirmation',

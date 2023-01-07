@@ -12,6 +12,11 @@ class BookingSettingMixin(object):
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
+        """Check user permission
+
+        Args:
+            request (Request): Specify the HTTP request object.
+        """
         if not request.user.is_staff:
             return redirect(settings.LOGIN_URL)
         return super().dispatch(request, *args, **kwargs)
